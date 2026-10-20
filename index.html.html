@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>미주·유럽 3개국 통합 마진계산기</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;color:#172338;background:#f3f6fa}
+*{box-sizing:border-box}body{margin:0;padding:24px 16px 50px}.wrap{max-width:1100px;margin:auto}
+h1{font-size:27px;margin:0 0 8px;letter-spacing:-.6px}.sub{color:#65738a;font-size:14px;margin:0 0 24px}
+.panel,.country{background:white;border:1px solid #e0e6ef;border-radius:16px;padding:22px;box-shadow:0 4px 16px #13233b09}
+.panel{margin-bottom:18px}.panel h2{font-size:17px;margin:0 0 17px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+label{font-size:13px;font-weight:700;color:#39475b;display:block;margin-bottom:7px}
+input,select{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:9px;font-size:17px;color:#1e293b;background:#fff}
+input:focus,select:focus{outline:2px solid #91b6ff;border-color:#548ef4}
+.countrygrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.country h3{font-size:18px;margin:0 0 4px}.currency{font-size:12px;color:#64748b;margin-bottom:17px}
+.country .field{margin:12px 0}.profit{font-size:27px;font-weight:800;letter-spacing:-1px;margin:10px 0 3px}
+.positive{color:#0b8a55}.negative{color:#d33b49}.muted{color:#64748b}
+.detail{font-size:12px;color:#66748a;line-height:1.8;margin-top:10px;border-top:1px solid #e9edf4;padding-top:12px}
+.best{border:2px solid #3277f5;background:#f8fbff}.tag{display:inline-block;background:#e8f0ff;color:#1c5bc5;border-radius:20px;padding:4px 9px;font-size:12px;font-weight:700;margin:5px 0}
+.summary{margin-top:18px;background:#142b50;color:white;border-radius:14px;padding:20px;font-size:16px;line-height:1.7}
+.summary strong{font-size:22px}.actions{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
+button{border:0;border-radius:9px;background:#245ac3;color:white;padding:12px 18px;font-size:14px;font-weight:700;cursor:pointer}
+button.secondary{background:#e8eef7;color:#28446e}
+.note{font-size:12px;color:#69758b;line-height:1.8;margin-top:20px}
+@media(max-width:760px){.countrygrid{grid-template-columns:1fr}.fields{grid-template-columns:1fr}h1{font-size:23px}.panel,.country{padding:17px}}
+</style>
+</head>
+<body><main class="wrap">
+<h1>미주·유럽 3개국 통합 마진계산기</h1>
+<p class="sub">부미사 강의 계산식 기반 · 미국 / 영국 / 독일 순이익 비교</p>
+<section class="panel"><h2>공통 입력</h2><div class="fields">
+<div><label for="sell">경쟁사 판매가 (원)</label><input id="sell" type="number" min="0" step="1" placeholder="예: 150000"></div>
+<div><label for="weight">예상 무게 (kg)</label><select id="weight"></select></div>
+</div></section>
+<section class="countrygrid">
+<div class="country" id="card-us"><h3>🇺🇸 미국</h3><div class="currency">아마존 미국 · USD</div>
+<div class="field"><label for="price-us">현지 구매가 ($)</label><input id="price-us" type="number" min="0" step="any" placeholder="예: 60.50"></div>
+<div class="field"><label for="rate-us">달러 환율 (원/USD)</label><select id="rate-us"></select></div>
+<div id="profit-us" class="profit muted">—</div><div id="tag-us"></div><div id="detail-us" class="detail">구매가를 입력하면 계산돼.</div></div>
+<div class="country" id="card-uk"><h3>🇬🇧 영국</h3><div class="currency">아마존 영국 · GBP</div>
+<div class="field"><label for="price-uk">현지 구매가 (£)</label><input id="price-uk" type="number" min="0" step="any" placeholder="예: 50.00"></div>
+<div class="field"><label for="rate-uk">파운드 환율 (원/GBP)</label><select id="rate-uk"></select></div>
+<div id="profit-uk" class="profit muted">—</div><div id="tag-uk"></div><div id="detail-uk" class="detail">구매가를 입력하면 계산돼.</div></div>
+<div class="country" id="card-de"><h3>🇩🇪 독일</h3><div class="currency">아마존 독일 · EUR</div>
+<div class="field"><label for="price-de">현지 구매가 (€)</label><input id="price-de" type="number" min="0" step="any" placeholder="예: 55.00"></div>
+<div class="field"><label for="rate-de">유로 환율 (원/EUR)</label><select id="rate-de"></select></div>
+<div id="profit-de" class="profit muted">—</div><div id="tag-de"></div><div id="detail-de" class="detail">구매가를 입력하면 계산돼.</div></div>
+</section>
+<section class="summary" id="summary">판매가와 국가별 구매가격을 입력하면 가장 유리한 국가를 표시해.</section>
+<div class="actions"><button id="clear" class="secondary">상품 입력값 초기화</button><button id="copy">계산 결과 복사</button></div>
+<p class="note">※ 강의 계산기의 고정 배송비·수수료표를 그대로 사용해. 계산된 금액은 예상치이며 실제 구매 가능 여부, 배송비 변동, 부가세 환급/면세 적용, 관부가세, 반품비 등은 별도로 확인해야 해.<br>
+※ 무게는 원본 미국 계산기의 1~20kg(0.5kg 간격)과 유럽 계산기의 선택값 중 공통으로 제공되는 값만 선택할 수 있어. 유럽 계산기의 0.5kg은 미국 요금표에 없어서 제외했어.<br>
+※ 환율은 원본 강의 계산기와 동일한 10원 단위 선택값이야. 환율은 자동 조회하지 않아.</p>
+</main>
+<script>
+'use strict';
+const shipping = {"us":{"1.0":13600,"1.5":16100,"2.0":18500,"2.5":21000,"3.0":23400,"3.5":25900,"4.0":28300,"4.5":30800,"5.0":33200,"5.5":35600,"6.0":38100,"6.5":40500,"7.0":42900,"7.5":45400,"8.0":47900,"8.5":50400,"9.0":52900,"9.5":55400,"10.0":57900,"10.5":60400,"11.0":62900,"11.5":65400,"12.0":67900,"12.5":70400,"13.0":72900,"13.5":75400,"14.0":77900,"14.5":80400,"15.0":82900,"15.5":85400,"16.0":87900,"16.5":90400,"17.0":92900,"17.5":95400,"18.0":97900,"18.5":100400,"19.0":102900,"19.5":105400,"20.0":107900},"de":{"0.5":10130,"1.0":12510,"1.5":15760,"2.0":17160,"2.5":19150,"3.0":21040,"3.5":24100,"4.0":26570,"4.5":29050,"5.0":31420,"6.0":37530,"7.0":42680,"8.0":47910,"9.0":53150,"10.0":60430,"11.0":67990,"12.0":73420,"13.0":78760,"14.0":84190,"15.0":89530,"16.0":94960,"17.0":100390,"18.0":105730,"19.0":111160,"20.0":116590,"21.0":123960,"22.0":129390,"23.0":134830,"24.0":140160,"25.0":145590,"26.0":151990,"27.0":157430,"28.0":162760,"29.0":168190,"30.0":173630},"uk":{"0.5":10230,"1.0":12700,"1.5":15180,"2.0":17550,"2.5":20900,"3.0":24250,"3.5":27540,"4.0":30450,"4.5":33560,"5.0":36180,"6.0":44420,"7.0":50820,"8.0":57320,"9.0":63720,"10.0":70710,"11.0":79150,"12.0":85740,"13.0":92240,"14.0":98740,"15.0":105240,"16.0":111740,"17.0":118340,"18.0":124830,"19.0":131330,"20.0":137830,"21.0":146270,"22.0":152870,"23.0":159370,"24.0":165870,"25.0":172360,"26.0":178860,"27.0":185460,"28.0":191960,"29.0":198460,"30.0":204960}};
+const countries = {us:'미국',uk:'영국',de:'독일'};
+const $ = id => document.getElementById(id);
+const money = n => Math.floor(n).toLocaleString('ko-KR')+'원';
+const validWeights = Object.keys(shipping.us).filter(w=>Object.hasOwn(shipping.uk,w)&&Object.hasOwn(shipping.de,w)).map(Number).sort((a,b)=>a-b);
+function setOptions(select, values, placeholder) {
+  select.replaceChildren();
+  const empty=document.createElement('option');empty.value='';empty.textContent=placeholder;select.appendChild(empty);
+  values.forEach(value=>{const o=document.createElement('option');o.value=value;o.textContent=value;select.appendChild(o)});
+}
+setOptions($('weight'),validWeights.map(w=>w.toFixed(1)),'무게 선택');
+for(const [id,start,end] of [['us',1200,1700],['de',1450,1900],['uk',1650,2200]]){
+  const vals=[];for(let i=start;i<=end;i+=10) vals.push(i);
+  setOptions($('rate-'+id),vals,'환율 선택');
+}
+let lastResults=[];
+function calculate(){
+  const selling=Number($('sell').value),weight=$('weight').value;
+  lastResults=[];
+  for(const id of ['us','uk','de']){
+    const rawPrice=$('price-'+id).value,rawRate=$('rate-'+id).value;
+    const profitEl=$('profit-'+id),detailEl=$('detail-'+id);
+    $('card-'+id).classList.remove('best');$('tag-'+id).textContent='';
+    if(!$('sell').value||!weight||rawPrice===''||rawRate===''){
+      profitEl.textContent='—';profitEl.className='profit muted';
+      detailEl.textContent='공통 입력과 구매가·환율을 입력해.';continue;
+    }
+    const price=Number(rawPrice),rate=Number(rawRate);
+    if(selling<=0||price<0||!Number.isFinite(price)){profitEl.textContent='입력값 확인';profitEl.className='profit negative';continue}
+    const shippingFee=shipping[id][weight];
+    const localCost=id==='us'?price*rate*1.024:(price/(id==='de'?1.19:1.20))*rate*1.085;
+    const agencyFee=id==='us'?0:price<=30?6000:price<=50?8000:10000;
+    const profit=Math.floor(selling*0.95-localCost-shippingFee-agencyFee);
+    const margin=(profit/selling*100);
+    lastResults.push({id,profit,margin,localCost,shippingFee,agencyFee,price,rate});
+    profitEl.textContent=money(profit);profitEl.className='profit '+(profit>=0?'positive':'negative');
+    detailEl.textContent=`마진율 ${margin.toFixed(2)}% · 매입원가 ${money(localCost)} · 국제배송비 ${money(shippingFee)} · 대행수수료 ${money(agencyFee)}`;
+  }
+  const viable=lastResults.filter(x=>x.profit>=0).sort((a,b)=>b.profit-a.profit);
+  if(viable.length){
+    const top=viable[0];$('card-'+top.id).classList.add('best');
+    $('tag-'+top.id).innerHTML='<span class="tag">최고 예상 순이익</span>';
+    $('summary').innerHTML=`추천 매입 국가: <strong>${countries[top.id]}</strong><br>예상 순이익 <strong>${money(top.profit)}</strong> · 예상 마진율 ${top.margin.toFixed(2)}%<br><small>입력한 국가 중 순이익이 가장 높은 곳 기준</small>`;
+  }else if(lastResults.length){
+    $('summary').textContent='입력한 국가 중 예상 순이익이 0원 이상인 곳이 없어. 나머지 국가가 비어 있다면 가격을 입력해 비교해 봐.';
+  }else{$('summary').textContent='판매가와 국가별 구매가격을 입력하면 가장 유리한 국가를 표시해.'}
+}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',calculate));
+$('clear').addEventListener('click',()=>{
+  $('sell').value='';for(const id of ['us','uk','de']) $('price-'+id).value='';
+  calculate();$('sell').focus();
+});
+$('copy').addEventListener('click',async()=>{
+  const lines=[`판매가: ${$('sell').value||'-'}원 / 무게: ${$('weight').value||'-'}kg`,...lastResults.map(x=>`${countries[x.id]} | 구매가 ${x.price} | 환율 ${x.rate} | 순이익 ${money(x.profit)} | 마진율 ${x.margin.toFixed(2)}%`)];
+  const txt=lines.join('\n');
+  try{await navigator.clipboard.writeText(txt);alert('계산 결과를 복사했어.')}catch(e){prompt('복사할 내용',txt)}
+});
+</script></body></html>
